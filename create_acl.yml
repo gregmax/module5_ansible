@@ -1,0 +1,53 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Create Public Network ACL
+# Complete example to create and delete a network ACL
+# that allows SSH, HTTP and ICMP in, and all traffic out.
+      ec2_vpc_nacl:
+        vpc_id: "{{ myvpc.vpc.id }}"
+        name: my-image-gallery-public-nacl
+        subnets:
+          - "{{ public_sn_1.subnet.id }}"
+          - "{{ public_sn_2.subnet.id }}"
+        ingress:
+            # rule no, protocol, allow/deny, cidr, icmp_type, icmp_code,
+            #                                             port from, port to
+            - [100, 'tcp', 'allow', '67.172.77.214/32', null, null, 22, 22]
+            - [200, 'tcp', 'allow', '67.172.77.214/32', null, null, 80, 80]
+            - [201, 'tcp', 'allow', '24.196.25.139/32', null, null, 80, 80]
+            - [300, 'tcp', 'allow', '67.172.77.214/32', null, null, 443, 443]
+            - [301, 'tcp', 'allow', '24.196.25.139/32', null, null, 443, 443]
+            - [800, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+            - [900, 'tcp', 'allow', '67.172.77.214/32', null, null, 5000, 5000]
+            - [901, 'tcp', 'allow', '24.196.25.139/32', null, null, 5000, 5000]
+            - [902, 'tcp', 'allow', '24.239.105.213/32', null, null, 5000, 5000]
+        egress:
+            - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80]
+            - [200, 'tcp', 'allow', '0.0.0.0/0', null, null, 443, 443]
+            - [900, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+        state: 'present'
+    - name: Create Private Network ACL
+# Complete example to create and delete a network ACL
+# that allows SSH, HTTP and ICMP in, and all traffic out.
+      ec2_vpc_nacl:
+        vpc_id: "{{ myvpc.vpc.id }}"
+        name: my-image-gallery-private-nacl
+        subnets:
+          - "{{ private_sn_1.subnet.id }}"
+          - "{{ private_sn_2.subnet.id }}"
+        ingress:
+            # rule no, protocol, allow/deny, cidr, icmp_type, icmp_code,
+            #                                             port from, port to
+            - [100, 'tcp', 'allow', '10.0.6.0/24', null, null, 22, 22]
+            - [200, 'tcp', 'allow', '10.0.0.0/8', null, null, 443, 443]
+            - [300, 'tcp', 'allow', '10.0.0.0/8', null, null, 80, 80]
+            - [400, 'tcp', 'allow', '10.0.0.0/8', null, null, 1024, 65535]
+            - [900, 'tcp', 'allow', '10.0.6.0/24', null, null, 5432, 5432]
+            - [901, 'tcp', 'allow', '10.0.8.0/24', null, null, 5432, 5432]
+        egress:
+            - [100, 'tcp', 'allow', '10.0.0.0/16', null, null, 80, 80]
+            - [200, 'tcp', 'allow', '10.0.0.0/16', null, null, 443, 443]
+            - [900, 'tcp', 'allow', '10.0.0.0/16', null, null, 1024, 65535]
+        state: 'present'

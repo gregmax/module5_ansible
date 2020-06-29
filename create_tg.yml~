@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  gather_facts: no
+  module_defaults:
+    group/aws:
+       region: us-east-1
+  tasks:
+    - name: Create target group
+      elb_target_group:
+        name: my-ig-targetgroup
+        protocol: tcp
+        port: 80
+        vpc_id: "{{ myvpc.vpc.id }}"
+        state: present

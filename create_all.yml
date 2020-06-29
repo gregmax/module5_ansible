@@ -1,0 +1,8 @@
+---
+- import_playbook: create_vpc.yml
+- import_playbook: create_acl.yml
+- import_playbook: create_ec2.yml
+- import_playbook: create_rds.yml
+- import_playbook: create_lt.yml
+- import_playbook: create_tg.yml
+- import_playbook: create_elb.yml

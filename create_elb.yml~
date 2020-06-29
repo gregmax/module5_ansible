@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  gather_facts: no
+  module_defaults:
+    group/aws:
+       region: us-east-1
+  tasks:
+    - name: Create ELB
+      elb_network_lb:
+          name: my-elb
+          subnets:
+            - "{{ public_sn_1.subnet.id }}"
+            - "{{ public_sn_2.subnet.id }}"
+          listeners:
+            - Protocol: TCP # Required. The protocol for connections from clients to the load balancer (TCP or TLS) (case-sensitive).
+              Port: 80 # Required. The port on which the load balancer is listening.
+              DefaultActions:
+                - Type: forward # Required. Only 'forward' is accepted at this time
+                  TargetGroupName: my-ig-targetgroup # Required. The name of the target group
+            - Protocol: TLS
+              Certificates:
+                - CertificateArn: "arn:aws:acm:us-east-1:841217761900:certificate/c687ed7f-9670-4855-8224-296d9277c37e"
+              Port: 443
+              DefaultActions:
+                - Type: forward
+                  TargetGroupName: my-ig-targetgroup
+          state: present

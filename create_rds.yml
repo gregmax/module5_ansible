@@ -1,0 +1,46 @@
+---
+- hosts: localhost
+  gather_facts: no
+  module_defaults:
+    group/aws:
+       region: us-east-1
+  tasks:
+    - name: Create RDS subnet
+      rds_subnet_group:
+        state: present
+        name: my-ig-private-dbgrp
+        description: Private subnet for RDS
+        subnets:
+          - "{{ private_sn_1.subnet.id }}"
+          - "{{ private_sn_2.subnet.id }}"
+      register: rds_sng
+
+    - debug:
+        var: rds_sng
+
+    - local_action:
+        module: rds
+        command: restore
+        snapshot: ig-snapshot-6-28-20
+        instance_name: image-gallery
+        region: us-east-1
+        zone: us-east-1f
+        subnet: "{{ rds_sng.subnet_group.name }}"
+        publicly_accessible: yes
+        wait: yes
+        wait_timeout: 600
+        tags:
+            Name: my-ig-db
+      register: rds
+
+    - local_action:
+        module: rds
+        command: modify
+        instance_name: image-gallery
+        region: us-east-1
+        vpc_security_groups:
+          - "{{ postgres_ig_sg.group_id }}"
+          - "{{ default.group_id }}"
+
+    - debug:
+        msg: "The new db endpoint is {{ rds.instance.endpoint }}"

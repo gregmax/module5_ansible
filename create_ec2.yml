@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+    ami_id: "ami-09d95fab7fff3776c"
+  module_defaults:
+    group/aws:
+       region: us-east-1
+  tasks:
+    - name: Provision dev EC2 instance
+      ec2:
+        key_name: gregmax
+        group: 
+          - my-image-gallery-dev-sg
+          - my-image-gallery-postgres-tag
+        instance_type: t2.micro
+        image: "{{ ami_id }}"
+        instance_tags:
+          Name: my-image-gallery-dev
+        wait: yes
+        vpc_subnet_id: "{{ public_sn_1.subnet.id }}" 
+        assign_public_ip: yes
+        exact_count: 1
+        instance_profile_name: image-gallery-server-role 
+        count_tag:
+          Name: my-image-gallery-dev
+        user_data: "{{ lookup('file', 'ec2_startup.sh') | b64encode }}"

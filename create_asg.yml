@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  gather_facts: no
+  module_defaults:
+    group/aws:
+       region: us-east-1
+  tasks:
+    - name: Create auto scaling group
+        ec2_asg:
+          name: my-python-ig-asg
+          launch_template:
+            launch_template_name: my-python-dev-lt
+          desired_capacity: 2
+          min_size: 2
+          max_size: 4
+          availability_zones: [ 'us-east-1a', 'us-east-1e' ]
+          vpc_zone_identifier:
+            - "{{ public_sn_1.subnet.id }}"
+            - "{{ public_sn_2.subnet.id }}"
+        register: my_asg
