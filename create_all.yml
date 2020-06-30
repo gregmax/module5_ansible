@@ -6,3 +6,5 @@
 - import_playbook: create_lt.yml
 - import_playbook: create_tg.yml
 - import_playbook: create_elb.yml
+- import_playbook: create_asg.yml
+- import_playbook: create_dns.yml

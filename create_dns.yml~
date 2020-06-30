@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  gather_facts: no
+  # module_defaults:
+  #   group/aws:
+  #      region: us-east-1
+  tasks:
+    - name: Retrieve, delete A records, and set new A records
+      route53:
+        state: get
+        record: bachedwards.com
+        type: A
+        zone: bachedwards.com
+      register: record
+
+    - route53:
+        state: absent
+        zone: bachedwards.com
+        record: "{{ record.set.record }}"
+        ttl: "{{ record.set.ttl }}"
+        type: "{{ record.set.type }}"
+        value: "{{ record.set.value }}"
+        wait: yes
+
+    - route53:
+        state: present
+        zone: bachedwards.com
+        record: bachedwards.com
+        type: A
+        ttl: 7200
+        value: 3.90.192.69,18.213.106.81
+        wait: yes
+
+  # query route 53
+  # remove existing records
+  # add new A records or insert 1 CNAME record of
